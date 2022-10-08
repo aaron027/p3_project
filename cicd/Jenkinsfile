@@ -3,6 +3,7 @@ pipeline {
     parameters {
         booleanParam defaultValue: false, name: 'terraform_stage'
         booleanParam defaultValue: false, name: 'deploy_S3'
+        booleanParam defaultValue: false, name: 'destroy_terraform'
     }
     options {
         ansiColor('xterm')
@@ -33,5 +34,18 @@ pipeline {
                 }
             }
         } 
+        stage('destroy terraform') {
+            when {expression{return params.destroy_terraform}}
+            steps {
+                withAWS(credentials: 'AWS_Credentials', region: 'us-east-1') {
+                    // some block
+                    dir('terraform') {
+                        sh '''
+                            terraform destroy --auto-approve
+                        '''
+                    }
+                }
+            }
+        }
     }    
 }
