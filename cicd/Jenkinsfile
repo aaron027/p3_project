@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    parameters {
+        booleanParam defaultValue: false, name: 'terraform_stage'
+        booleanParam defaultValue: false, name: 'deploy_S3'
+    }
+    options {
+        ansiColor('xterm')
+    }
+    stages{
+        stage('terraform stage') {
+            when {expression{return params.terraform_stage}}
+            steps {
+                withAWS(credentials: 'AWS_Credentials', region: 'us-east-1') {
+                    // some block
+                    dir('terraform') {
+                        sh '''
+                            terraform init
+                            terraform apply --auto-approve
+                        '''
+                    }
+                }
+            }
+        }
+         stage('deploy to S3') {
+            when {expression{return params.deploy_S3}}
+            steps {
+                withAWS(credentials: 'AWS_Credentials', region: 'us-east-1') {
+                    // some block
+                        sh 'aws s3 cp public s3://bo-chen.click --recursive'
+                        sh 'aws s3api put-bucket-policy --bucket bo-chen.click --policy file://policy.json'
+                        sh 'aws s3 website s3://bo-chen.click/ --index-document index.html --error-document error.html'
+                }
+            }
+        } 
+    }    
+}
