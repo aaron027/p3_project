@@ -30,6 +30,8 @@ pipeline {
                     
                      sh '''
                             sudo npm cache clean -f
+                            sudo npm install -g n install n 
+                            sudo n stable
                             rm -rf node_modules
                             rm -rf package-lock.json
                             sudo npm install
