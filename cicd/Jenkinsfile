@@ -27,10 +27,13 @@ pipeline {
             when {expression{return params.deploy_S3}}
             steps {
                 withAWS(credentials: 'AWS_Credentials', region: 'us-east-1') {
-                    // some block
-                        sh 'aws s3 cp public s3://bo-chen.click --recursive'
-                        // sh 'aws s3api put-bucket-policy --bucket bo-chen.click --policy file://policy.json'
-                        sh 'aws s3 website s3://bo-chen.click/ --index-document index.html --error-document error.html'
+                    
+                     sh '''
+                            npm install
+                            npm run build
+                            aws s3 cp build s3://bo-chen.click --recursive
+                            aws s3 website s3://bo-chen.click/ --index-document index.html --error-document error.html
+                        '''
                 }
             }
         } 
