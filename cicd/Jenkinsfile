@@ -29,11 +29,11 @@ pipeline {
                 withAWS(credentials: 'AWS_Credentials', region: 'us-east-1') {
                     
                      sh '''
-                            npm cache clean -f
+                            sudo npm cache clean -f
                             rm -rf node_modules
                             rm -rf package-lock.json
-                            npm install
-                            npm run build
+                            sudo npm install
+                            sudo npm run build
                             aws s3 cp build s3://bo-chen.click --recursive
                             aws s3 website s3://bo-chen.click/ --index-document index.html --error-document error.html
                         '''
