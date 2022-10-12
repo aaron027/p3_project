@@ -16,8 +16,10 @@ pipeline {
                     // some block
                     dir('terraform') {
                         sh '''
-                            terraform init
-                            terraform apply --auto-approve
+                            terraform init  -migrate-state
+                            terraform validate
+                            terraform plan -out=junglemeet.plan
+                            terraform apply junglemeet.plan
                         '''
                     }
                 }
@@ -36,6 +38,7 @@ pipeline {
                             rm -rf package-lock.json
                             sudo npm install
                             sudo npm run build
+                            sudo npm run test
                             aws s3 cp build s3://bo-chen.click --recursive
                             aws s3 website s3://bo-chen.click/ --index-document index.html --error-document error.html
                         '''
@@ -56,5 +59,11 @@ pipeline {
                 }
             }
         }
-    }    
+    }  
+    post {
+        // Clean after build
+        always {
+            cleanWs()
+        }
+    }  
 }
