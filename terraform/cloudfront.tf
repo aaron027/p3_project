@@ -174,7 +174,7 @@ resource "aws_s3_bucket_public_access_block" "root_bucket_public_access_block" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-  depends_on              = [aws_cloudfront_distribution.root_s3_distribution]
+  depends_on              = [aws_s3_bucket_policy.root_cloudfront_bucket]
 }
 
 resource "aws_s3_bucket_public_access_block" "www_bucket_public_access_block" {
@@ -184,7 +184,7 @@ resource "aws_s3_bucket_public_access_block" "www_bucket_public_access_block" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-  depends_on              = [aws_cloudfront_distribution.www_s3_distribution]
+  depends_on              = [aws_s3_bucket_policy.www_cloudfront_bucket]
 }
 
 data "aws_iam_policy_document" "root-cloudfront-read_bucket_only" {
