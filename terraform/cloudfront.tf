@@ -167,25 +167,25 @@ resource "aws_cloudfront_origin_access_identity" "cloudfront_origin_access_ident
   depends_on = [time_sleep.wait_30_seconds]
 }
 
-resource "aws_s3_bucket_public_access_block" "root_bucket_public_access_block" {
-  bucket = aws_s3_bucket.root_bucket.bucket
+# resource "aws_s3_bucket_public_access_block" "root_bucket_public_access_block" {
+#   bucket = aws_s3_bucket.root_bucket.bucket
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-  depends_on              = [aws_s3_bucket_policy.root_cloudfront_bucket]
-}
+#   block_public_acls       = true
+#   block_public_policy     = true
+#   ignore_public_acls      = true
+#   restrict_public_buckets = true
+#   depends_on              = [aws_s3_bucket_policy.root_cloudfront_bucket]
+# }
 
-resource "aws_s3_bucket_public_access_block" "www_bucket_public_access_block" {
-  bucket = aws_s3_bucket.www_bucket.bucket
+# resource "aws_s3_bucket_public_access_block" "www_bucket_public_access_block" {
+#   bucket = aws_s3_bucket.www_bucket.bucket
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-  depends_on              = [aws_s3_bucket_policy.www_cloudfront_bucket]
-}
+#   block_public_acls       = true
+#   block_public_policy     = true
+#   ignore_public_acls      = true
+#   restrict_public_buckets = true
+#   depends_on              = [aws_s3_bucket_policy.www_cloudfront_bucket]
+# }
 
 data "aws_iam_policy_document" "root-cloudfront-read_bucket_only" {
   statement {
