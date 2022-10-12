@@ -269,3 +269,11 @@ output "identity-path"{
 output "identity_arn"{
   value =aws_cloudfront_origin_access_identity.cloudfront_origin_access_identity.iam_arn
 }
+
+output "bucket_name"{
+  value = aws_s3_bucket.root_bucket.bucket
+}
+
+output "bucket_name_id"{
+  value = aws_s3_bucket.root_bucket.id
+}
