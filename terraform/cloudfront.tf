@@ -4,7 +4,7 @@
 resource "aws_cloudfront_distribution" "www_s3_distribution" {
   origin {
     domain_name = aws_s3_bucket.www_bucket.bucket_regional_domain_name
-    origin_id   = aws_s3_bucket.www_bucket.bucket_regional_domain_name
+    origin_id   = "S3--www.${var.bucket_name}"
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.cloudfront_origin_access_identity.cloudfront_access_identity_path
@@ -14,41 +14,17 @@ resource "aws_cloudfront_distribution" "www_s3_distribution" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
-
-  aliases = ["www.${var.domain_name}"]
-
+  aliases             = ["www.${var.domain_name}"]
   custom_error_response {
     error_caching_min_ttl = 0
     error_code            = 404
     response_code         = 200
-    response_page_path    = "/404.html"
+    response_page_path    = "/error.html"
   }
-
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = aws_s3_bucket.www_bucket.bucket_regional_domain_name
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 31536000
-    default_ttl            = 31536000
-    max_ttl                = 31536000
-    compress               = true
-  }
-
-  ordered_cache_behavior {
-    path_pattern     = "/content/*"
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = aws_s3_bucket.www_bucket.bucket_regional_domain_name
+    target_origin_id = "S3--www.${var.bucket_name}"
 
     forwarded_values {
       query_string = false
@@ -58,14 +34,12 @@ resource "aws_cloudfront_distribution" "www_s3_distribution" {
       }
     }
 
+    viewer_protocol_policy = "allow-all"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
     compress               = true
-    viewer_protocol_policy = "redirect-to-https"
   }
-
-  price_class = "PriceClass_200"
 
   restrictions {
     geo_restriction {
@@ -82,7 +56,7 @@ resource "aws_cloudfront_distribution" "www_s3_distribution" {
   tags = var.common_tags
 
   depends_on = [
-    aws_s3_bucket.www_bucket
+    aws_s3_bucket.root_bucket
   ]
 }
 
@@ -90,7 +64,7 @@ resource "aws_cloudfront_distribution" "www_s3_distribution" {
 resource "aws_cloudfront_distribution" "root_s3_distribution" {
   origin {
     domain_name = aws_s3_bucket.root_bucket.bucket_regional_domain_name
-    origin_id   = aws_s3_bucket.root_bucket.bucket_regional_domain_name
+    origin_id   = "S3--.${var.bucket_name}"
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.cloudfront_origin_access_identity.cloudfront_access_identity_path
     }
@@ -101,10 +75,11 @@ resource "aws_cloudfront_distribution" "root_s3_distribution" {
 
   aliases = [var.domain_name]
 
+
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = aws_s3_bucket.root_bucket.bucket_regional_domain_name
+    target_origin_id = "S3--.${var.bucket_name}"
 
     forwarded_values {
       query_string = true
@@ -116,33 +91,12 @@ resource "aws_cloudfront_distribution" "root_s3_distribution" {
       headers = ["Origin"]
     }
 
-    viewer_protocol_policy = "allow-all"
-    min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
-  }
-  ordered_cache_behavior {
-    path_pattern     = "/content/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = aws_s3_bucket.root_bucket.bucket_regional_domain_name
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
+    viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
   }
 
-  price_class = "PriceClass_200"
   restrictions {
     geo_restriction {
       restriction_type = "none"
@@ -244,19 +198,19 @@ output "root_regional_name" {
   value = aws_s3_bucket.root_bucket.bucket_regional_domain_name
 }
 
-output "identity-path"{
+output "identity-path" {
   value = aws_cloudfront_origin_access_identity.cloudfront_origin_access_identity.cloudfront_access_identity_path
 }
 
-output "identity_arn"{
-  value =aws_cloudfront_origin_access_identity.cloudfront_origin_access_identity.iam_arn
+output "identity_arn" {
+  value = aws_cloudfront_origin_access_identity.cloudfront_origin_access_identity.iam_arn
 }
 
-output "bucket_name"{
+output "bucket_name" {
   value = aws_s3_bucket.root_bucket.bucket
 }
 
-output "bucket_name_id"{
+output "bucket_name_id" {
   value = aws_s3_bucket.root_bucket.id
 }
 
@@ -267,6 +221,10 @@ resource "aws_s3_bucket_public_access_block" "root_bucket_public_access_block" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+
+  depends_on = [
+    aws_route53_record.root-a
+  ]
 }
 
 resource "aws_s3_bucket_public_access_block" "www_bucket_public_access_block" {
@@ -276,4 +234,8 @@ resource "aws_s3_bucket_public_access_block" "www_bucket_public_access_block" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+
+  depends_on = [
+    aws_route53_record.www-a
+  ]
 }
