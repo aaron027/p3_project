@@ -60,8 +60,10 @@ pipeline {
     }  
    
     post {
-        echo 'I will always say Hello again! test for webhook'
-        cleanWs()
+        always{
+            echo 'I will always say Hello again! test for webhook'
+            cleanWs()
+        }
         success
         {
             emailext (
