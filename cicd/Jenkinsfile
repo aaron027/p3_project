@@ -64,11 +64,15 @@ pipeline {
         always {
             echo 'I will always say Hello again! test for webhook'
             cleanWs()
-            step([$class: 'Mailer',
-            notifyEveryUnstableBuild: true,
-            recipients: "bo.chen027@gmail.com",
-            sendToIndividuals: true])
-            
+            success
+            {
+                emailext (
+                    subject: '$DEFAULT_SUBJECT',
+                    body: '$DEFAULT_CONTENT',
+                    to: '$DEFAULT_RECIPIENTS',
+                    recipientProviders: [ requestor() ]
+                    )
+            }
         }
     }
 }
