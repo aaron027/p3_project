@@ -39,7 +39,7 @@ pipeline {
                             sudo npm install
                             sudo npm install --save-dev prettier-eslint
                             sudo npm run build
-                            aws s3 cp build s3://www.bo-chen.click --recursive
+                            aws s3 cp build s3://www.aaron027.click --recursive
                         '''
                 }
             }
@@ -76,11 +76,11 @@ pipeline {
         }
         failure
         {
-        emailext (
-            subject: '$DEFAULT_SUBJECT',
-            body: '$DEFAULT_CONTENT',
-            recipientProviders: [developers(), requestor(), culprits()]
-            )
+            emailext (
+                subject: '$DEFAULT_SUBJECT',
+                body: '$DEFAULT_CONTENT',
+                recipientProviders: [developers(), requestor(), culprits()]
+                )
         }
         
     }

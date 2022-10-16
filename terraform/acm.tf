@@ -2,7 +2,7 @@
 resource "aws_acm_certificate" "ssl_certificate" {
   provider                  = aws.acm_provider
   domain_name               = var.domain_name
-  subject_alternative_names = ["*.${var.domain_name}"]
+  subject_alternative_names = ["www.${var.domain_name}"]
   #   validation_method = "EMAIL"
   validation_method = "DNS"
 
@@ -12,8 +12,6 @@ resource "aws_acm_certificate" "ssl_certificate" {
     create_before_destroy = true
   }
 }
-
-
 
 # Uncomment the validation_record_fqdns line if you do DNS validation instead of Email.
 resource "aws_acm_certificate_validation" "cert_validation" {
